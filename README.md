@@ -90,11 +90,13 @@ Results saved to result.csv
 
 This package helps users evaluate and rank alternatives based on multiple criteria by applying the TOPSIS methodology.  
 It is suitable for academic assignments, research work, and real-world decision-making problems.
-Before procedding make sure of certian points:
-1.Correct number of parameters (inputFileName, Weights, Impacts, resultFileName).
-2.The input file must contain three or more columns.
-3.From 2nd to last columns must contain numeric values.
-4.The number of weights, number of impacts and number of columns (from 2nd to last columns) must be the same.
+
+Before proceeding, make sure of the following points:
+
+1. Correct number of parameters (`inputFileName`, `Weights`, `Impacts`, `resultFileName`).
+2. The input file must contain three or more columns.
+3. From the 2nd to the last columns, all values must be numeric.
+4. The number of weights, number of impacts, and number of criteria columns (from 2nd to last) must be the same.
 
 ---
 
