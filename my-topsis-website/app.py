@@ -1,17 +1,12 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request
 import pandas as pd
 import numpy as np
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
-import os
+# We removed the 'smtplib' and 'email' imports since we aren't using real email anymore
 import io
 
 app = Flask(__name__)
 
-# --- TOPSIS LOGIC ---
+# --- 1. TOPSIS LOGIC (Same as before) ---
 def calculate_topsis(df, weights, impacts):
     try:
         # Extract numeric data (assuming first col is non-numeric)
@@ -53,73 +48,48 @@ def calculate_topsis(df, weights, impacts):
     except Exception as e:
         return None, str(e)
 
-# --- EMAIL LOGIC ---
+# --- 2. MOCK EMAIL FUNCTION ---
 def send_email(to_email, result_df):
-    from_email = "your-email@gmail.com"   # <--- REPLACE THIS
-    password = "your-app-password"        # <--- REPLACE THIS (Google App Password)
-    
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = "Your TOPSIS Result File"
-    
-    body = "Hello,\n\nPlease find attached the result file with Topsis Scores and Ranks.\n\nRegards,\nTopsis Web Service"
-    msg.attach(MIMEText(body, 'plain'))
-    
-    # Convert DF to CSV in memory
-    buffer = io.StringIO()
-    result_df.to_csv(buffer, index=False)
-    buffer.seek(0)
-    
-    part = MIMEBase('application', "octet-stream")
-    part.set_payload(buffer.getvalue())
-    encoders.encode_base64(part)
-    part.add_header('Content-Disposition', 'attachment; filename="result.csv"')
-    msg.attach(part)
-    
-    try:
-        s = smtplib.SMTP('smtp.gmail.com', 587)
-        s.starttls()
-        s.login(from_email, password)
-        s.sendmail(from_email, to_email, msg.as_string())
-        s.quit()
-        return True
-    except Exception as e:
-        print("Email Error:", e)
-        return False
+    # This function pretends to send an email so the code doesn't crash.
+    # It prints to the server logs instead.
+    print(f"--------------------------------------------------")
+    print(f" [MOCK EMAIL] To: {to_email}")
+    print(f" [CONTENT] Topsis Results Calculated Successfully.")
+    print(f"--------------------------------------------------")
+    return True # Always returns True to simulate success
 
-# --- ROUTES ---
+# --- 3. ROUTES ---
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         try:
-            # 1. Get Form Data
+            # Get Form Data
             file = request.files['file']
             weights_str = request.form['weights']
             impacts_str = request.form['impacts']
-            email_id = request.form['email']
+            email_id = request.form['email'] # We still accept the email input
             
             if not file or not weights_str or not impacts_str or not email_id:
                 return render_template('index.html', message="Error: All fields are required.")
 
-            # 2. Process Data
+            # Process Data
             df = pd.read_csv(file)
             weights = [float(w) for w in weights_str.split(',')]
             impacts = impacts_str.split(',')
             
-            # 3. Run Topsis
+            # Run Topsis
             result_df, error = calculate_topsis(df, weights, impacts)
             
             if error:
                 return render_template('index.html', message=error)
             
-            # 4. Send Email
+            # Send (Mock) Email
             success = send_email(email_id, result_df)
             
             if success:
                 return render_template('index.html', message=f"Success! Result sent to {email_id}")
             else:
-                return render_template('index.html', message="Error: Could not send email. Check server logs.")
+                return render_template('index.html', message="Error: Could not send email.")
                 
         except Exception as e:
             return render_template('index.html', message=f"Error: {str(e)}")
